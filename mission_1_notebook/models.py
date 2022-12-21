@@ -7,7 +7,7 @@ class FCN8s(nn.Module):
         
         
         self.relu    = nn.ReLU(inplace=True)
-        
+        self.cnn= nn.Conv2d()
         
        
 
