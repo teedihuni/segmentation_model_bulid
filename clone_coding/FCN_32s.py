@@ -1,8 +1,13 @@
 import torch
 import torch.nn as nn
-class FCN8s(nn.Module):
-    def __init__(self, num_classes=21):
-        super(FCN8s, self).__init__()     
+from torch.nn import functional as F
+import torchsummary
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+class FCN32s(nn.Module):
+    def __init__(self, num_classes):
+        super(FCN32s, self).__init__()     
         self.relu = nn.ReLU(inplace=True)
         
         def CBR(in_channels, out_channels, kernel_size=3, stride=1,padding=1):
@@ -11,7 +16,7 @@ class FCN8s(nn.Module):
                                        kernel_size=kernel_size,
                                        stride=stride,
                                        padding=padding),
-                                nn.Relu(inplace=True))
+                                nn.ReLU(inplace=True))
         
         #conv1
         self.conv1_1 = CBR(3, 64, 3, 1, 1)
@@ -42,11 +47,11 @@ class FCN8s(nn.Module):
         self.pool5 = nn.MaxPool2d(2, stride=2, ceil_mode=True) #1/32
         
         #fc6
-        self.fc6 = nn.CBR(512, 4096, 1, 1, 0)  #1*1 conv
+        self.fc6 = CBR(512, 4096, 1, 1, 0)  #1*1 conv
         self.drop6 = nn.Dropout2d()
         
         #fc7
-        self.fc7 = nn.CBR(4096, 4096, 1, 1, 0)
+        self.fc7 = CBR(4096, 4096, 1, 1, 0)
         self.drop7 = nn.Dropout2d()
         
         #score
@@ -90,3 +95,14 @@ class FCN8s(nn.Module):
         output32 = self.up32(x)
 
         return output32
+    
+model = FCN32s(num_classes=21)
+
+x = torch.randn([1, 3, 512, 512])
+print("input shape : ", x.shape)
+out = model(x).to(device)
+print("output shape : ", out.size())
+
+model = model.to(device)
+
+torchsummary.summary(model,(3,512,512), batch_size=1, device='cpu')
