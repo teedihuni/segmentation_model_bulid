@@ -2,7 +2,7 @@ import os
 import random
 import torch
 import torch.nn as nn
-import torchsummary
+from torchsummary import summary
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -116,6 +116,6 @@ print("ouput_shape:", out.size())
 
 model = model.to(device)
 
-torchsummary.summary(model,(3,512,512), batch_size=1, device='cpu')
+summary(model,(3,512,512), batch_size=1, device='cpu')
         
         
